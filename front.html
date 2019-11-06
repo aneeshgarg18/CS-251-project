@@ -1,0 +1,77 @@
+<html>
+
+<head>
+	<style type="text/css">
+		#editor {
+			width: 400px;
+			height: 100px;
+			padding: 10px;
+			background-color: #444;
+			color: white;
+			font-size: 14px;
+			font-family: monospace;
+		}
+		  
+		.statement {
+			color: orange;
+		}
+	</style>
+</head>
+
+<body><!-- 
+<div id="thing" contenteditable="true" oninput="func(event);" style="width: 100px; height: 100px">
+</div> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<div id="editor" contenteditable="true"></div>
+</body>
+
+<script type="text/javascript">
+	// div = document.getElementById("thing");
+	// console.log(div.innerHTML);
+
+	// function func(event) {
+	// 	console.log(event.data);
+	// }
+	$("#editor").on("keypress", function(e){
+		console.log(e.keyCode);
+		if (e.keyCode == 32 || e.keyCode == 13){
+			var text = $(this).text().replace(/[\s]+/g, " ").trim();
+			var word = text.split(" ");
+			var newHTML = "";
+
+			$.each(word, function(index, value){
+				switch(value.toUpperCase()){
+					case "SELECT":
+					case "FROM":
+					case "WHERE":
+					case "LIKE":
+					case "BETWEEN":
+					case "NOT LIKE":
+					case "FALSE":
+					case "NULL":
+					case "FROM":
+					case "TRUE":
+					case "NOT IN":
+						newHTML += "<span class='statement'>" + value + "</span><span class='other'> </span>";
+						break;
+					default: 
+						newHTML += "<span class='other'>" + value + " </span>";
+				}
+			});
+		  	$(this).html(newHTML);
+			
+			//// Set cursor postion to end of text
+			var child = $(this).children();
+			var range = document.createRange();
+			var sel = window.getSelection();
+			console.log(child.length);
+			range.setStart(child[child.length - 1], 1);
+			range.collapse(true);
+			sel.removeAllRanges();
+			sel.addRange(range);
+			$(this)[0].focus(); 
+		}
+	});
+</script>
+
+</html>
