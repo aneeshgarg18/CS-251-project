@@ -40,6 +40,10 @@ for sent in sent_list:
     for w in range(len(word_list)):
         word = word_list[w]
         if len(word)==1:
+            if word.isalpha():
+                if word!='a' and word!='i':
+                    print(word)
+                    print(['a','i'])
             pass
 #        elif word in words.words() or ((word[:1].lower()+word[1:]) in words.words() and w==0):
 #            pass
