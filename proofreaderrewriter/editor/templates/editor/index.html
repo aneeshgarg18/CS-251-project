@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <style type="text/css">
+        #editor {
+            width: 500px;
+            height: 200px;
+            padding: 10px;
+            background-color: #d0d0d0;
+            color: black;
+            font-size: 18px;
+            font-family: monospace;
+        }
+          
+        .spell {
+            border-bottom: 2px solid #f00000;
+        }
+
+        .gramm {
+            border-bottom: 2px solid #00c000;
+        }
+
+        .rewrt {
+            border-bottom: 2px solid #0000e0;
+        }
+    </style>
+</head>
+
+<body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<h1 align="center">Proof Reader ReWriter</h1>
+
+<div id="editor" contenteditable="true"></div>
+
+<p id="sugg_msg"></p>
+<table id="sugg_table" style="padding-left: 20px; border-collapse: separate; border-spacing: 0 15px">
+</table>
+
+</body>
+
+<script type="text/javascript">
+    var eddie = $("#editor");
+    var sugg_msg = document.getElementById("sugg_msg");
+    var sugg_table = document.getElementById("sugg_table");
+    var count_bad = 0;
+    var curr_type = 0;
+
+    function request(text) {
+        $.ajax(
+            {
+                type: "GET",
+                url: "parser/",
+                data: {
+                    st: text,
+                    type: curr_type
+                },
+                success: function(data)
+                {
+                    // if(data.type == 6) {
+                        console.log(data.type);
+                    // }
+                    var newHTML = "";
+                    var type;
+                    curr_type = data.type;
+                    switch(data.type) {
+                        case 1:
+                            type = 'spell'; break;
+                        case 3: case 4: case 5: case 6: case 7:
+                            type = 'gramm'; break;
+                        case 2: case 8: case 9:
+                            type = 'rewrt'; break;
+                    }
+
+                    for(i in data.text) {
+                        phrase = data.text[i];
+                        value = phrase[0];
+                        sugg = phrase[1];
+                        if(sugg.length == 0) {
+                            newHTML += "<span class='other'>" + value + "</span>";
+                        }
+                        else {
+                            newHTML += "<span id=\"w" + i + "\" class='"+ type + "'>" + value + "</span>";
+                            count_bad++;
+                        }
+                    }
+                    console.log(newHTML);
+                    eddie.html(newHTML);
+                    var child = eddie.children();
+                    var range = document.createRange();
+                    var sel = window.getSelection();
+                    range.setStart(child[child.length - 1], 1);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    eddie[0].focus();
+
+                    for(i in data.text) {
+                        phrase = data.text[i];
+                        value = phrase[0];
+                        sugg = phrase[1];
+                        if(sugg.length > 0) {
+                            document.getElementById("w"+i).onclick = setSugg(i, sugg);
+                        }
+                    }
+                }
+            });
+    }
+
+    function clearSugg() {
+        sugg_msg.innerHTML = "";
+        var l = sugg_table.rows.length;
+        for(var i=0; i<l; i++) {
+            sugg_table.deleteRow(0);
+        }
+    }
+    function replace(id, sug) {
+        return function() {
+            word = document.getElementById("w"+id);
+            word.innerHTML = sug;
+            word.className = "other";
+            word.onclick = function() {};
+            clearSugg();
+            count_bad--;
+            if(count_bad <= 0) {
+                request(eddie.text().replace(/[\s]+/g, " ").trim());
+            }
+        }
+    }
+    function setSugg(id, arr) {
+        return function() {
+            clearSugg();
+            sugg_msg.innerHTML = "<i>Suggestions:</i>";
+            for(var i in arr) {
+                var row = sugg_table.insertRow(i);
+                row.innerHTML = arr[i];
+                row.onclick = replace(id, arr[i]);
+            }
+            row = sugg_table.insertRow(arr.length);
+            row.innerHTML = "<i>Ignore</i>";
+            row.onclick = replace(id, document.getElementById("w"+id).innerHTML);
+        }
+    }
+ 
+    eddie.on("keypress", function(e){
+        clearSugg();
+        curr_type = 0;
+
+        var ch = String.fromCharCode(e.which);
+        if(ch == '.' || ch == '!' || ch == '?') {
+            var text = $(this).text().replace(/[\s]+/g, " ").trim() + ch;
+            console.log("--" + text + "--");
+
+            request(text);
+        }
+    });
+</script>
+
+</html>
