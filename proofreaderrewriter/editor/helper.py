@@ -42,8 +42,12 @@ def convert(tokens_list, corrupted_indices):
 			string += space_needed(tokens_list[index]) + word(tokens_list[index])
 	if string != '':
 		ans.append((string + space_needed(tokens_list[index]), []))
+	# if ans[-1][0] == '':
+	# print(ans[-1][0])
+		# ans[-1] = ('.', [])
 	final = []
 	for pair in ans:
+		# print(pair[0], pair[1])
 		mod = pair[0][0]
 		for i in range(1, len(pair[0])):
 			if pair[0][i-1] == '"' and pair[0][i] == ' ':
@@ -52,6 +56,7 @@ def convert(tokens_list, corrupted_indices):
 				mod += pair[0][i]
 		final.append((mod, pair[1]))
 	return final
+	
 
 def adj_convert(tokens_list, corrupted_indices):
 	'''

@@ -3,6 +3,8 @@
 <html>
 
 <head>
+    <title>ProofReaderRewriter</title>
+
     <style type="text/css">
         #editor {
             width: 500px;
@@ -67,11 +69,14 @@
                     var type;
                     curr_type = data.type;
                     switch(data.type) {
-                        case 1:
+                        // case 1:
+                        case 1: case 2:
                             type = 'spell'; break;
-                        case 3: case 4: case 5: case 6: case 7:
+                        // case 3: case 4: case 5: case 6: case 2: case 7: 
+                        case 3: case 4: case 5: case 6: case 8: case 7: 
                             type = 'gramm'; break;
-                        case 2: case 8: case 9:
+                        // case 9: case 8:
+                        case 9: case 10:
                             type = 'rewrt'; break;
                     }
 
